@@ -1,5 +1,11 @@
 # penpot-exporter
 
+## 0.3.0
+
+### Minor Changes
+
+- [#61](https://github.com/penpot/penpot-exporter-figma-plugin/pull/61) [`881ccab`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/881ccabe86d5a96e6efc84a1ec5e74f9cf5c4ca7) Thanks [@jordisala1991](https://github.com/jordisala1991)! - Added text basic properties
+
 ## 0.2.2
 
 ### Patch Changes
