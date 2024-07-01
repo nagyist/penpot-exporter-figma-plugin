@@ -1,16 +1,18 @@
-import { transformSceneNode } from '@plugin/transformers';
+import { translateChildren, translateMaskChildren } from '@plugin/translators';
 
-import { PenpotNode } from '@ui/lib/types/penpotNode';
 import { Children } from '@ui/lib/types/utils/children';
 
-export const transformChildren = async (
-  node: ChildrenMixin,
-  baseX: number = 0,
-  baseY: number = 0
-): Promise<Children> => {
+const nodeActsAsMask = (node: SceneNode): boolean => {
+  return 'isMask' in node && node.isMask;
+};
+
+export const transformChildren = async (node: ChildrenMixin): Promise<Children> => {
+  const maskIndex = node.children.findIndex(nodeActsAsMask);
+  const containsMask = maskIndex !== -1;
+
   return {
-    children: (
-      await Promise.all(node.children.map(child => transformSceneNode(child, baseX, baseY)))
-    ).filter((child): child is PenpotNode => !!child)
+    children: containsMask
+      ? await translateMaskChildren(node.children, maskIndex)
+      : await translateChildren(node.children)
   };
 };

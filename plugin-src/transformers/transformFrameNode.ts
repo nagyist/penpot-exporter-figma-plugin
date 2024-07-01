@@ -1,29 +1,50 @@
+import { registerComponentProperties } from '@plugin/registerComponentProperties';
 import {
+  transformAutoLayout,
   transformBlend,
   transformChildren,
+  transformConstraints,
   transformCornerRadius,
-  transformDimensionAndPosition,
+  transformDimension,
   transformEffects,
+  transformFigmaIds,
   transformFills,
+  transformLayoutAttributes,
+  transformOverrides,
   transformProportion,
+  transformRotationAndPosition,
   transformSceneNode,
   transformStrokes
 } from '@plugin/transformers/partials';
 
-import { FrameShape } from '@ui/lib/types/frame/frameShape';
+import { FrameShape } from '@ui/lib/types/shapes/frameShape';
+import { Point } from '@ui/lib/types/utils/point';
 
-const isSectionNode = (node: FrameNode | SectionNode): node is SectionNode => {
+const isSectionNode = (node: FrameNode | SectionNode | ComponentSetNode): node is SectionNode => {
   return node.type === 'SECTION';
 };
 
+const isComponentSetNode = (
+  node: FrameNode | SectionNode | ComponentSetNode
+): node is ComponentSetNode => {
+  return node.type === 'COMPONENT_SET';
+};
+
 export const transformFrameNode = async (
-  node: FrameNode | SectionNode,
-  baseX: number,
-  baseY: number
+  node: FrameNode | SectionNode | ComponentSetNode
 ): Promise<FrameShape> => {
   let frameSpecificAttributes: Partial<FrameShape> = {};
+  let referencePoint: Point = { x: node.absoluteTransform[0][2], y: node.absoluteTransform[1][2] };
+
+  if (isComponentSetNode(node)) {
+    registerComponentProperties(node);
+  }
 
   if (!isSectionNode(node)) {
+    const { x, y, ...transformAndRotation } = transformRotationAndPosition(node);
+
+    referencePoint = { x, y };
+
     // Figma API does not expose strokes, blend modes, corner radius, or constraint proportions for sections,
     // they plan to add it in the future. Refactor this when available.
     frameSpecificAttributes = {
@@ -32,8 +53,12 @@ export const transformFrameNode = async (
       // @see: https://forum.figma.com/t/add-a-blendmode-property-for-sectionnode/58560
       ...transformBlend(node),
       ...transformProportion(node),
+      ...transformLayoutAttributes(node, true),
       ...transformCornerRadius(node),
-      ...transformEffects(node)
+      ...transformEffects(node),
+      ...transformConstraints(node),
+      ...transformAutoLayout(node),
+      ...transformAndRotation
     };
   }
 
@@ -41,10 +66,13 @@ export const transformFrameNode = async (
     type: 'frame',
     name: node.name,
     showContent: isSectionNode(node) ? true : !node.clipsContent,
+    ...transformFigmaIds(node),
     ...transformFills(node),
+    ...referencePoint,
     ...frameSpecificAttributes,
-    ...(await transformChildren(node, baseX + node.x, baseY + node.y)),
-    ...transformDimensionAndPosition(node, baseX, baseY),
-    ...transformSceneNode(node)
+    ...transformDimension(node),
+    ...(await transformChildren(node)),
+    ...transformSceneNode(node),
+    ...transformOverrides(node)
   };
 };

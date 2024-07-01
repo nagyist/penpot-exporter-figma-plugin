@@ -1,31 +1,37 @@
 import {
   transformBlend,
+  transformConstraints,
   transformCornerRadius,
-  transformDimensionAndPosition,
+  transformDimension,
   transformEffects,
+  transformFigmaIds,
   transformFills,
+  transformLayoutAttributes,
+  transformOverrides,
   transformProportion,
+  transformRotationAndPosition,
   transformSceneNode,
   transformStrokes
 } from '@plugin/transformers/partials';
 
-import { RectShape } from '@ui/lib/types/rect/rectShape';
+import { RectShape } from '@ui/lib/types/shapes/rectShape';
 
-export const transformRectangleNode = (
-  node: RectangleNode,
-  baseX: number,
-  baseY: number
-): RectShape => {
+export const transformRectangleNode = (node: RectangleNode): RectShape => {
   return {
     type: 'rect',
     name: node.name,
+    ...transformFigmaIds(node),
     ...transformFills(node),
     ...transformEffects(node),
     ...transformStrokes(node),
-    ...transformDimensionAndPosition(node, baseX, baseY),
+    ...transformDimension(node),
+    ...transformRotationAndPosition(node),
     ...transformSceneNode(node),
     ...transformBlend(node),
     ...transformProportion(node),
-    ...transformCornerRadius(node)
+    ...transformLayoutAttributes(node),
+    ...transformCornerRadius(node),
+    ...transformConstraints(node),
+    ...transformOverrides(node)
   };
 };

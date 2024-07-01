@@ -1,29 +1,35 @@
 import {
   transformBlend,
-  transformDimensionAndPosition,
+  transformConstraints,
+  transformDimension,
   transformEffects,
+  transformFigmaIds,
   transformFills,
+  transformLayoutAttributes,
+  transformOverrides,
   transformProportion,
+  transformRotationAndPosition,
   transformSceneNode,
   transformStrokes
 } from '@plugin/transformers/partials';
 
-import { CircleShape } from '@ui/lib/types/circle/circleShape';
+import { CircleShape } from '@ui/lib/types/shapes/circleShape';
 
-export const transformEllipseNode = (
-  node: EllipseNode,
-  baseX: number,
-  baseY: number
-): CircleShape => {
+export const transformEllipseNode = (node: EllipseNode): CircleShape => {
   return {
     type: 'circle',
     name: node.name,
+    ...transformFigmaIds(node),
     ...transformFills(node),
     ...transformEffects(node),
     ...transformStrokes(node),
-    ...transformDimensionAndPosition(node, baseX, baseY),
+    ...transformDimension(node),
+    ...transformRotationAndPosition(node),
     ...transformSceneNode(node),
     ...transformBlend(node),
-    ...transformProportion(node)
+    ...transformProportion(node),
+    ...transformLayoutAttributes(node),
+    ...transformConstraints(node),
+    ...transformOverrides(node)
   };
 };

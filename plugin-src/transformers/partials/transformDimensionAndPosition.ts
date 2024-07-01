@@ -1,13 +1,20 @@
-import { ShapeGeomAttributes } from '@ui/lib/types/shape/shapeGeomAttributes';
+import { ShapeGeomAttributes } from '@ui/lib/types/shapes/shape';
+
+export const transformDimension = (
+  node: DimensionAndPositionMixin
+): Pick<ShapeGeomAttributes, 'width' | 'height'> => {
+  return {
+    width: node.width,
+    height: node.height
+  };
+};
 
 export const transformDimensionAndPosition = (
-  node: DimensionAndPositionMixin,
-  baseX: number,
-  baseY: number
+  node: DimensionAndPositionMixin
 ): ShapeGeomAttributes => {
   return {
-    x: node.x + baseX,
-    y: node.y + baseY,
+    x: node.absoluteTransform[0][2],
+    y: node.absoluteTransform[1][2],
     width: node.width,
     height: node.height
   };

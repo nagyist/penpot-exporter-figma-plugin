@@ -1,4 +1,4 @@
-import { ShapeAttributes } from '@ui/lib/types/shape/shapeAttributes';
+import { ShapeAttributes } from '@ui/lib/types/shapes/shape';
 
 const isRectangleCornerMixin = (
   node: CornerMixin | (CornerMixin & RectangleCornerMixin)
@@ -8,7 +8,10 @@ const isRectangleCornerMixin = (
 
 export const transformCornerRadius = (
   node: CornerMixin | (CornerMixin & RectangleCornerMixin)
-): Partial<ShapeAttributes> | undefined => {
+):
+  | Pick<ShapeAttributes, 'r1' | 'r2' | 'r3' | 'r4'>
+  | Pick<ShapeAttributes, 'rx' | 'ry'>
+  | undefined => {
   if (isRectangleCornerMixin(node)) {
     return {
       r1: node.topLeftRadius,
@@ -20,7 +23,8 @@ export const transformCornerRadius = (
 
   if (node.cornerRadius !== figma.mixed) {
     return {
-      rx: node.cornerRadius
+      rx: node.cornerRadius,
+      ry: node.cornerRadius
     };
   }
 };

@@ -1,9 +1,10 @@
-import { translateShadowEffects } from '@plugin/translators';
+import { translateBlurEffects, translateShadowEffects } from '@plugin/translators';
 
-import { ShapeAttributes } from '@ui/lib/types/shape/shapeAttributes';
+import { ShapeAttributes } from '@ui/lib/types/shapes/shape';
 
-export const transformEffects = (node: BlendMixin): Partial<ShapeAttributes> => {
+export const transformEffects = (node: BlendMixin): Pick<ShapeAttributes, 'shadow' | 'blur'> => {
   return {
-    shadow: translateShadowEffects(node.effects)
+    shadow: translateShadowEffects(node.effects),
+    blur: translateBlurEffects(node.effects)
   };
 };

@@ -1,59 +1,35 @@
 import {
   transformBlend,
-  transformDimensionAndPosition,
+  transformConstraints,
+  transformDimension,
   transformEffects,
-  transformFills,
+  transformFigmaIds,
+  transformLayoutAttributes,
+  transformOverrides,
   transformProportion,
+  transformRotationAndPosition,
   transformSceneNode,
   transformStrokes,
-  transformTextStyle
+  transformText
 } from '@plugin/transformers/partials';
-import {
-  translateGrowType,
-  translateStyledTextSegments,
-  translateVerticalAlign
-} from '@plugin/translators';
 
-import { TextShape } from '@ui/lib/types/text/textShape';
+import { TextShape } from '@ui/lib/types/shapes/textShape';
 
-export const transformTextNode = (node: TextNode, baseX: number, baseY: number): TextShape => {
-  const styledTextSegments = node.getStyledTextSegments([
-    'fontName',
-    'fontSize',
-    'fontWeight',
-    'lineHeight',
-    'letterSpacing',
-    'textCase',
-    'textDecoration',
-    'fills'
-  ]);
-
+export const transformTextNode = (node: TextNode): TextShape => {
   return {
     type: 'text',
     name: node.name,
-    content: {
-      type: 'root',
-      verticalAlign: translateVerticalAlign(node.textAlignVertical),
-      children: [
-        {
-          type: 'paragraph-set',
-          children: [
-            {
-              type: 'paragraph',
-              children: translateStyledTextSegments(node, styledTextSegments),
-              ...(styledTextSegments.length ? transformTextStyle(node, styledTextSegments[0]) : {}),
-              ...transformFills(node)
-            }
-          ]
-        }
-      ]
-    },
-    growType: translateGrowType(node),
-    ...transformDimensionAndPosition(node, baseX, baseY),
+    ...transformFigmaIds(node),
+    ...transformText(node),
+    ...transformDimension(node),
+    ...transformRotationAndPosition(node),
     ...transformEffects(node),
     ...transformSceneNode(node),
     ...transformBlend(node),
     ...transformProportion(node),
-    ...transformStrokes(node)
+    ...transformLayoutAttributes(node),
+    ...transformStrokes(node),
+    ...transformConstraints(node),
+    ...transformOverrides(node)
   };
 };

@@ -1,53 +1,69 @@
-import { calculateAdjustment } from '@plugin/utils';
-
-import { PenpotNode } from '@ui/lib/types/penpotNode';
+import { PenpotNode } from '@ui/types';
 
 import {
+  transformBooleanNode,
+  transformComponentNode,
   transformEllipseNode,
   transformFrameNode,
   transformGroupNode,
-  transformImageNode,
+  transformInstanceNode,
+  transformLineNode,
   transformPathNode,
   transformRectangleNode,
-  transformTextNode
+  transformTextNode,
+  transformVectorNode
 } from '.';
 
-export const transformSceneNode = async (
-  node: SceneNode,
-  baseX: number = 0,
-  baseY: number = 0
-): Promise<PenpotNode | undefined> => {
-  // @TODO: when penpot 2.0, manage image as fills for the basic types
-  if (
-    'fills' in node &&
-    node.fills !== figma.mixed &&
-    node.fills.find(fill => fill.type === 'IMAGE')
-  ) {
-    // If the nested frames extended the bounds of the rasterized image, we need to
-    // account for this both in position on the canvas and the calculated width and
-    // height of the image.
-    const [adjustedX, adjustedY] = calculateAdjustment(node);
-    return await transformImageNode(node, baseX + adjustedX, baseY + adjustedY);
-  }
+export const transformSceneNode = async (node: SceneNode): Promise<PenpotNode | undefined> => {
+  let penpotNode: PenpotNode | undefined;
+
+  figma.ui.postMessage({
+    type: 'PROGRESS_CURRENT_ITEM',
+    data: node.name
+  });
 
   switch (node.type) {
     case 'RECTANGLE':
-      return transformRectangleNode(node, baseX, baseY);
+      penpotNode = transformRectangleNode(node);
+      break;
     case 'ELLIPSE':
-      return transformEllipseNode(node, baseX, baseY);
+      penpotNode = transformEllipseNode(node);
+      break;
     case 'SECTION':
     case 'FRAME':
-      return await transformFrameNode(node, baseX, baseY);
+    case 'COMPONENT_SET':
+      penpotNode = await transformFrameNode(node);
+      break;
     case 'GROUP':
-      return await transformGroupNode(node, baseX, baseY);
+      penpotNode = await transformGroupNode(node);
+      break;
     case 'TEXT':
-      return transformTextNode(node, baseX, baseY);
+      penpotNode = transformTextNode(node);
+      break;
+    case 'VECTOR':
+      penpotNode = transformVectorNode(node);
+      break;
+    case 'LINE':
+      penpotNode = transformLineNode(node);
+      break;
     case 'STAR':
     case 'POLYGON':
-    case 'VECTOR':
-    case 'LINE':
-      return transformPathNode(node, baseX, baseY);
+      penpotNode = transformPathNode(node);
+      break;
+    case 'BOOLEAN_OPERATION':
+      penpotNode = await transformBooleanNode(node);
+      break;
+    case 'COMPONENT':
+      penpotNode = await transformComponentNode(node);
+      break;
+    case 'INSTANCE':
+      penpotNode = await transformInstanceNode(node);
+      break;
   }
 
-  console.error(`Unsupported node type: ${node.type}`);
+  if (penpotNode === undefined) {
+    console.error(`Unsupported node type: ${node.type}`);
+  }
+
+  return penpotNode;
 };

@@ -1,68 +1,45 @@
-import { translateFill } from '@plugin/translators/translateFills';
+import { translateFill } from '@plugin/translators/fills';
 
 import { Stroke, StrokeAlignment, StrokeCaps } from '@ui/lib/types/utils/stroke';
 
 export const translateStrokes = (
-  nodeStrokes: MinimalStrokesMixin,
-  hasFillGeometry?: boolean,
-  vectorNetwork?: VectorNetwork,
-  individualStrokes?: IndividualStrokesMixin
+  node: MinimalStrokesMixin | (MinimalStrokesMixin & IndividualStrokesMixin),
+  strokeCaps: (stroke: Stroke) => Stroke = stroke => stroke
 ): Stroke[] => {
-  return nodeStrokes.strokes.map((paint, index) => {
-    const fill = translateFill(paint, 0, 0);
-    const stroke: Stroke = {
-      strokeColor: fill?.fillColor,
-      strokeOpacity: fill?.fillOpacity,
-      strokeWidth: translateStrokeWeight(nodeStrokes.strokeWeight, individualStrokes),
-      strokeAlignment: translateStrokeAlignment(nodeStrokes.strokeAlign),
-      strokeStyle: nodeStrokes.dashPattern.length ? 'dashed' : 'solid'
-    };
+  const sharedStrokeProperties: Stroke = {
+    strokeWidth: translateStrokeWeight(node),
+    strokeAlignment: translateStrokeAlignment(node.strokeAlign),
+    strokeStyle: node.dashPattern.length ? 'dashed' : 'solid'
+  };
 
-    if (!hasFillGeometry && index === 0 && vectorNetwork && vectorNetwork.vertices.length > 0) {
-      stroke.strokeCapStart = translateStrokeCap(vectorNetwork.vertices[0]);
-      stroke.strokeCapEnd = translateStrokeCap(
-        vectorNetwork.vertices[vectorNetwork.vertices.length - 1]
-      );
-    }
-
-    return stroke;
-  });
-};
-
-const translateStrokeWeight = (
-  strokeWeight: number | typeof figma.mixed,
-  individualStrokes?: IndividualStrokesMixin
-): number => {
-  if (strokeWeight !== figma.mixed) {
-    return strokeWeight;
-  }
-
-  if (!individualStrokes) {
-    return 1;
-  }
-
-  return Math.max(
-    individualStrokes.strokeTopWeight,
-    individualStrokes.strokeRightWeight,
-    individualStrokes.strokeBottomWeight,
-    individualStrokes.strokeLeftWeight
+  return node.strokes.map((paint, index) =>
+    translateStroke(paint, sharedStrokeProperties, strokeCaps, index === 0)
   );
 };
 
-const translateStrokeAlignment = (
-  strokeAlign: 'CENTER' | 'INSIDE' | 'OUTSIDE'
-): StrokeAlignment => {
-  switch (strokeAlign) {
-    case 'CENTER':
-      return 'center';
-    case 'INSIDE':
-      return 'inner';
-    case 'OUTSIDE':
-      return 'outer';
+export const translateStroke = (
+  paint: Paint,
+  sharedStrokeProperties: Stroke,
+  strokeCaps: (stroke: Stroke) => Stroke,
+  firstStroke: boolean
+): Stroke => {
+  const fill = translateFill(paint);
+
+  let stroke: Stroke = {
+    strokeColor: fill?.fillColor,
+    strokeOpacity: fill?.fillOpacity,
+    strokeImage: fill?.fillImage,
+    ...sharedStrokeProperties
+  };
+
+  if (firstStroke) {
+    stroke = strokeCaps(stroke);
   }
+
+  return stroke;
 };
 
-const translateStrokeCap = (vertex: VectorVertex): StrokeCaps | undefined => {
+export const translateStrokeCap = (vertex: VectorVertex): StrokeCaps | undefined => {
   switch (vertex.strokeCap as StrokeCap | ConnectorStrokeCap) {
     case 'ROUND':
       return 'round';
@@ -80,5 +57,43 @@ const translateStrokeCap = (vertex: VectorVertex): StrokeCaps | undefined => {
     case 'NONE':
     default:
       return;
+  }
+};
+
+const translateStrokeWeight = (
+  node: MinimalStrokesMixin | (MinimalStrokesMixin & IndividualStrokesMixin)
+): number => {
+  if (node.strokeWeight !== figma.mixed) {
+    return node.strokeWeight;
+  }
+
+  if (!isIndividualStrokes(node)) {
+    return 1;
+  }
+
+  return Math.max(
+    node.strokeTopWeight,
+    node.strokeRightWeight,
+    node.strokeBottomWeight,
+    node.strokeLeftWeight
+  );
+};
+
+const isIndividualStrokes = (
+  node: MinimalStrokesMixin | IndividualStrokesMixin
+): node is IndividualStrokesMixin => {
+  return 'strokeTopWeight' in node;
+};
+
+const translateStrokeAlignment = (
+  strokeAlign: 'CENTER' | 'INSIDE' | 'OUTSIDE'
+): StrokeAlignment => {
+  switch (strokeAlign) {
+    case 'CENTER':
+      return 'center';
+    case 'INSIDE':
+      return 'inner';
+    case 'OUTSIDE':
+      return 'outer';
   }
 };

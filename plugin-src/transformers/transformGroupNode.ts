@@ -1,25 +1,35 @@
 import {
   transformBlend,
-  transformDimensionAndPosition,
+  transformDimension,
   transformEffects,
+  transformFigmaIds,
+  transformOverrides,
+  transformRotationAndPosition,
   transformSceneNode
 } from '@plugin/transformers/partials';
 import { transformChildren } from '@plugin/transformers/partials';
 
-import { GroupShape } from '@ui/lib/types/group/groupShape';
+import { GroupShape } from '@ui/lib/types/shapes/groupShape';
 
-export const transformGroupNode = async (
-  node: GroupNode,
-  baseX: number,
-  baseY: number
-): Promise<GroupShape> => {
+export const transformGroupNode = async (node: GroupNode): Promise<GroupShape> => {
+  return {
+    ...transformFigmaIds(node),
+    ...transformGroupNodeLike(node),
+    ...transformEffects(node),
+    ...transformBlend(node),
+    ...(await transformChildren(node)),
+    ...transformOverrides(node)
+  };
+};
+
+export const transformGroupNodeLike = (
+  node: BaseNodeMixin & LayoutMixin & SceneNodeMixin
+): GroupShape => {
   return {
     type: 'group',
     name: node.name,
-    ...(await transformChildren(node, baseX, baseY)),
-    ...transformDimensionAndPosition(node, baseX, baseY),
-    ...transformEffects(node),
-    ...transformSceneNode(node),
-    ...transformBlend(node)
+    ...transformDimension(node),
+    ...transformRotationAndPosition(node),
+    ...transformSceneNode(node)
   };
 };

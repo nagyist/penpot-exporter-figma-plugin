@@ -1,34 +1,40 @@
+import { parseSVG } from 'svg-path-parser';
+
 import {
   transformBlend,
-  transformDimensionAndPosition,
+  transformConstraints,
   transformEffects,
+  transformFigmaIds,
   transformFills,
+  transformLayoutAttributes,
+  transformOverrides,
   transformProportion,
+  transformRotation,
   transformSceneNode,
-  transformStrokes,
-  transformVectorPaths
+  transformStrokes
 } from '@plugin/transformers/partials';
+import { translateCommands } from '@plugin/translators/vectors';
 
-import { PathShape } from '@ui/lib/types/path/pathShape';
+import { PathShape, Segment } from '@ui/lib/types/shapes/pathShape';
 
-const hasFillGeometry = (node: VectorNode | StarNode | LineNode | PolygonNode): boolean => {
-  return 'fillGeometry' in node && node.fillGeometry.length > 0;
-};
-
-export const transformPathNode = (
-  node: VectorNode | StarNode | LineNode | PolygonNode,
-  baseX: number,
-  baseY: number
-): PathShape => {
+export const transformPathNode = (node: StarNode | PolygonNode): PathShape => {
   return {
+    type: 'path',
     name: node.name,
-    ...(hasFillGeometry(node) ? transformFills(node) : []),
+    content: translatePathNode(node),
+    ...transformFigmaIds(node),
+    ...transformFills(node),
     ...transformStrokes(node),
     ...transformEffects(node),
-    ...transformVectorPaths(node, baseX, baseY),
-    ...transformDimensionAndPosition(node, baseX, baseY),
     ...transformSceneNode(node),
     ...transformBlend(node),
-    ...transformProportion(node)
+    ...transformProportion(node),
+    ...transformRotation(node),
+    ...transformLayoutAttributes(node),
+    ...transformConstraints(node),
+    ...transformOverrides(node)
   };
 };
+
+const translatePathNode = (node: StarNode | PolygonNode): Segment[] =>
+  translateCommands(node, parseSVG(node.fillGeometry[0].data));
