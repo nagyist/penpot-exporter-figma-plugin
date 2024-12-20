@@ -1,3 +1,5 @@
+import { getUserData } from '@plugin/getUserData';
+
 import { findAllTextNodes } from './findAllTextnodes';
 import { handleExportMessage } from './handleExportMessage';
 import { registerChange } from './registerChange';
@@ -9,11 +11,12 @@ figma.showUI(__html__, { themeColors: true, width: BASE_WIDTH, height: BASE_HEIG
 
 figma.ui.onmessage = message => {
   if (message.type === 'ready') {
+    getUserData();
     findAllTextNodes();
   }
 
   if (message.type === 'export') {
-    handleExportMessage(message.data as Record<string, string>);
+    handleExportMessage();
   }
 
   if (message.type === 'cancel') {
