@@ -1,5 +1,19 @@
 # penpot-exporter
 
+## 0.15.0
+
+### Minor Changes
+
+- [#275](https://github.com/penpot/penpot-exporter-figma-plugin/pull/275)
+  [`db22ac4`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/db22ac41ab5991fd4c1ddc45729ce295abf5b120)
+  Thanks [@jordisala1991](https://github.com/jordisala1991)! - Upgrade internal dependencies
+
+### Patch Changes
+
+- [#273](https://github.com/penpot/penpot-exporter-figma-plugin/pull/273)
+  [`e8743e3`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/e8743e3c2f620b90c37075419b4c3c06b08a30ea)
+  Thanks [@jordisala1991](https://github.com/jordisala1991)! - Disable Sentry in development mode
+
 ## 0.14.4
 
 ### Patch Changes
