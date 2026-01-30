@@ -1,5 +1,19 @@
 # penpot-exporter
 
+## 0.19.3
+
+### Patch Changes
+
+- [#340](https://github.com/penpot/penpot-exporter-figma-plugin/pull/340)
+  [`e9ddcea`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/e9ddcea20463ecdcedab63cf0de208030c54df1f)
+  Thanks [@SpykeRel04D](https://github.com/SpykeRel04D)! - Cleaning tracking objects to free up
+  memory
+
+- [#345](https://github.com/penpot/penpot-exporter-figma-plugin/pull/345)
+  [`b3f62a4`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/b3f62a451a1d674bcc9a6d2187bdddd84c5725f7)
+  Thanks [@SpykeRel04D](https://github.com/SpykeRel04D)! - Fix variable alias resolution for
+  external Design System references
+
 ## 0.19.2
 
 ### Patch Changes
