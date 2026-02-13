@@ -1,5 +1,14 @@
 # penpot-exporter
 
+## 0.20.0
+
+### Minor Changes
+
+- [#352](https://github.com/penpot/penpot-exporter-figma-plugin/pull/352)
+  [`43cde4c`](https://github.com/penpot/penpot-exporter-figma-plugin/commit/43cde4c52ff03e73ca9a361ad843c2b9b01128ad)
+  Thanks [@SpykeRel04D](https://github.com/SpykeRel04D)! - Replace how images are being converted
+  using a modern format (webp)
+
 ## 0.19.4
 
 ### Patch Changes
